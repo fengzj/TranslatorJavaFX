@@ -1,7 +1,7 @@
 package com.maple;
 
 public enum Languages {
-    ENGLISH("en"), CHINESE_SIMPLE("zh-CN"), AUTO("auto");
+    ENGLISH("en"), CHINESE_SIMPLE("zh-CN"), AUTO("auto"), NOTSET("null");
 
     private final String value;
 

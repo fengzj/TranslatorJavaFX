@@ -2,6 +2,9 @@ package com.maple;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -13,6 +16,9 @@ public class Speech {
     // Audio properties
     private byte[] bytes;
     private boolean isProcessed;
+    
+    private String hostname;
+    private int port;
 
     public Speech() {
         this.isProcessed = false;
@@ -62,21 +68,22 @@ public class Speech {
         }
 
         String tk = GoogleTK.TL(text);
-        
+
         // Creating the URL
-//        String urlString = "https://translate.google.com/translate_tts?ie=UTF-8&q=" + encodedText + "&tl="
-//                + language.getValue() + "&total=1&idx=0&client=t";
-        String urlString = "https://translate.google.cn/translate_tts?ie=UTF-8"
-                + "&q=" + encodedText
-                + "&tl=" + language.getValue()
-                + "&total=1&idx=0"
-                + "&textlen=" + text.length()
-                + "&tk=" + tk
+        String urlString = "https://translate.google.cn/translate_tts?ie=UTF-8" + "&q=" + encodedText + "&tl="
+                + language.getValue() + "&total=1&idx=0" + "&textlen=" + text.length() + "&tk=" + tk
                 + "&client=t&prev=input";
 
         try {
             URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpURLConnection conn = null;
+            if (!"".equals(hostname) && !(port == -1)) {
+                SocketAddress addr = new InetSocketAddress(hostname, port);
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, addr);
+                conn = (HttpURLConnection) url.openConnection(proxy);
+            } else {
+                conn = (HttpURLConnection) url.openConnection();
+            }
 
             // Fake the User-Agent
             conn.setRequestProperty("User-Agent", "Mozilla/5.0");
@@ -121,5 +128,21 @@ public class Speech {
     public void setText(String text) {
         this.text = text;
         this.isProcessed = false;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

@@ -18,25 +18,27 @@
             <Font name="Microsoft YaHei" size="16.0" />
          </font></TextArea>
         <Label layoutX="19.0" layoutY="14.0" prefHeight="23.0" prefWidth="49.0" text="源语言：" AnchorPane.leftAnchor="19.0" />
-        <ChoiceBox layoutX="68.0" layoutY="14.0" prefHeight="23.0" prefWidth="73.0" value="自动检测">
+        <ChoiceBox fx:id="sourceLangCbox" layoutX="68.0" layoutY="14.0" prefHeight="23.0" prefWidth="73.0" value="自动检测">
 			<items>
 				<FXCollections fx:factory="observableArrayList">
 					<String fx:value="English" />
 					<String fx:value="简体中文" />
 					<String fx:value="自动检测" />
+					<String fx:value="未设置" />
 				</FXCollections>
 			</items>
 		</ChoiceBox>
         <Label layoutX="146.0" layoutY="14.0" prefHeight="23.0" prefWidth="61.0" text="目的语言：" />
-        <ChoiceBox layoutX="207.0" layoutY="14.0" prefHeight="23.0" prefWidth="73.0" value="简体中文">
-                    <items>
+        <ChoiceBox fx:id="destLangCbox" layoutX="207.0" layoutY="14.0" prefHeight="23.0" prefWidth="73.0" value="简体中文">
+            <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="English" />
                     <String fx:value="简体中文" />
+                    <String fx:value="未设置" />
                 </FXCollections>
             </items>
         </ChoiceBox>
         <Button layoutX="294.0" layoutY="14.0" mnemonicParsing="false" onAction="#speak" text="朗读" />
-        <Button layoutX="246.0" layoutY="212.0" mnemonicParsing="false" prefHeight="23.0" prefWidth="87.0" text="设置" />
+        <Button layoutX="246.0" layoutY="212.0" mnemonicParsing="false" onAction="#showSettingPanel" prefHeight="23.0" prefWidth="87.0" text="代理设置" />
     </children>
 </AnchorPane>
