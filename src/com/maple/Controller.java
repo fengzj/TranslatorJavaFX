@@ -31,33 +31,33 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class Controller {
-    
+
     @FXML
     public TextArea textArea;
-    
+
     @FXML
     public ChoiceBox<String> sourceLangCbox;
-    
+
     @FXML
     public ChoiceBox<String> destLangCbox;
-    
+
     private Screen screen = Screen.getPrimary();
     private Rectangle2D bounds = screen.getVisualBounds();
     private final double maxX = bounds.getMaxX();
     private final double maxY = bounds.getMaxY();
-    
+
     private double mainWidth;
     private double mainHeight;
     private double mainScreenX;
     private double mainScreenY;
     private boolean isFirstShow = true;
-    
+
     private Languages sourceLang;
     private Languages destLang;
     private String hostname;
     private int port;
     private String text = getClipboard();
-    
+
     public void initialize() {
         getProperties();
         initComponent();
@@ -83,9 +83,7 @@ public class Controller {
         }
         sourceLang = changeToLanguages(properties.getProperty("sourceLang"));
         destLang = changeToLanguages(properties.getProperty("destLang"));
-        if (Pattern.matches(
-                "([1-9]|[1-9]//d|1//d{2}|2[0-4]//d|25[0-5])(//.(//d|[1-9]//d|1//d{2}|2[0-4]//d|25[0-5])){3}",
-                properties.getProperty("destLang"))) {
+        if (Pattern.matches("([1-9]+.){3}[1-9]+", properties.getProperty("hostname"))) {
             hostname = properties.getProperty("hostname");
         } else {
             hostname = "";
@@ -114,7 +112,7 @@ public class Controller {
         default:
             sourceLangCbox.getSelectionModel().select(3);
         }
-        
+
         switch (destLang) {
         case ENGLISH:
             destLangCbox.getSelectionModel().select(0);
@@ -128,22 +126,26 @@ public class Controller {
         default:
             destLangCbox.getSelectionModel().select(2);
         }
-        
+
         sourceLangCbox.getSelectionModel().selectedItemProperty().addListener((selected, oldValue, newValue) -> {
             sourceLang = changeToLanguages(newValue);
             text = getClipboard();
-            translate();
+            if (!isFirstShow) {
+                translate();
+            }
             setProperties("sourceLang", newValue);
         });
-        
+
         destLangCbox.getSelectionModel().selectedItemProperty().addListener((selected, oldValue, newValue) -> {
             destLang = changeToLanguages(newValue);
             text = getClipboard();
-            translate();
+            if (!isFirstShow) {
+                translate();
+            }
             setProperties("destLang", newValue);
         });
     }
-    
+
     private void setProperties(String key, String value) {
         Properties properties = new Properties();
         try (InputStream fis = new FileInputStream("config.properties")) {
@@ -156,7 +158,7 @@ public class Controller {
             e.printStackTrace();
         }
     }
-    
+
     private Languages changeToLanguages(String value) {
         switch (value) {
         case "English":
@@ -171,13 +173,12 @@ public class Controller {
             return Languages.NOTSET;
         }
     }
-    
+
     public void exit(ActionEvent event) {
         System.exit(0);
     }
-    
-    public void setUnvisible(ActionEvent event)
-    {
+
+    public void setUnvisible(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.hide();
         while (true) {
@@ -212,7 +213,7 @@ public class Controller {
             }
         }
     }
-    
+
     public void showSettingPanel(ActionEvent event) throws IOException {
         Stage settingStage = new Stage();
         AnchorPane root = new AnchorPane();
@@ -242,13 +243,13 @@ public class Controller {
         portTextField.setPrefSize(150, 20);
         portTextField.setLayoutX(67);
         portTextField.setLayoutY(68);
+        IPTextField.setText(hostname);
+        portTextField.setText(String.valueOf(port));
         cancelButton.setOnAction(e -> {
             settingStage.close();
         });
         saveButton.setOnAction(e -> {
-            if (Pattern.matches(
-                    "([1-9]|[1-9]//d|1//d{2}|2[0-4]//d|25[0-5])(//.(//d|[1-9]//d|1//d{2}|2[0-4]//d|25[0-5])){3}",
-                    IPTextField.getText())) {
+            if (Pattern.matches("([1-9]+.){3}[1-9]+", IPTextField.getText())) {
                 hostname = IPTextField.getText();
             } else {
                 hostname = "";
@@ -265,22 +266,22 @@ public class Controller {
         root.getChildren().addAll(saveButton, cancelButton, IPLabel, portLabel, IPTextField, portTextField);
         settingStage.initStyle(StageStyle.TRANSPARENT);
         settingStage.setAlwaysOnTop(true);
-        if (!isFirstShow)
-        {
+        if (!isFirstShow) {
             settingStage.setX(mainScreenX + (mainWidth - 250) / 2);
             settingStage.setY(mainScreenY + (mainHeight - 150) / 2);
         }
         settingStage.show();
     }
-    
-    public String getClipboard()
-    {
+
+    public String getClipboard() {
         Clipboard clipboard = Clipboard.getSystemClipboard();
-        return (String)clipboard.getContent(DataFormat.PLAIN_TEXT);
+        return (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
     }
-    
-    public void speak()
-    {
+
+    public void speak() {
+        if (isFirstShow) {
+            return;
+        }
         Speech speech = new Speech();
         speech.setText(text);
         speech.setLanguage(sourceLang);
@@ -292,9 +293,8 @@ public class Controller {
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.play();
     }
-    
-    private void translate()
-    {
+
+    private void translate() {
         Translator translator = new Translator();
         translator.setSourceLang(sourceLang);
         translator.setDestLang(destLang);
